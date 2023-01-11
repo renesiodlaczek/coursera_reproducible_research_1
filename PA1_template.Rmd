@@ -8,18 +8,80 @@ output:
 
 ## Loading and preprocessing the data
 
+```{r}
+data <- read.csv("activity/activity.csv")
 
+```
 
 ## What is mean total number of steps taken per day?
 
+```{r}
+steps <- aggregate(data$steps, by = list(data$date), sum, na.rm = TRUE)
 
+mean(steps$x)
+
+```
 
 ## What is the average daily activity pattern?
 
+```{r}
+pattern <- aggregate(data$steps, by = list(data$interval), mean, na.rm = TRUE)
 
+names(pattern)[1] <- "interval"
+names(pattern)[2] <- "mean_steps"
+
+plot(pattern$interval, 
+     pattern$mean_steps, 
+     type = "l",
+     xlab = "Interval",
+     ylab = "Average steps")
+
+```
 
 ## Imputing missing values
 
+```{r}
 
+data_imp <- tapply(data$steps, 
+                   as.factor(data$interval), 
+                   \(x) replace(x, is.na(x), mean(x, na.rm = TRUE)),
+                   simplify = TRUE)
+
+head(data_imp)
+
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+
+data$date <- as.Date(data$date)
+data$weekdays <- weekdays(data$date, abbreviate = TRUE)
+is_weekend <- data$weekdays %in% c("Sa", "So")
+
+pattern_weekend <- aggregate(data$steps[is_weekend], by = list(data$interval[is_weekend]), mean, na.rm = TRUE)
+pattern_weekday <- aggregate(data$steps[!is_weekend], by = list(data$interval[!is_weekend]), mean, na.rm = TRUE)
+
+names(pattern_weekend)[1] <- "interval"
+names(pattern_weekend)[2] <- "mean_steps"
+names(pattern_weekday)[1] <- "interval"
+names(pattern_weekday)[2] <- "mean_steps"
+
+plot(pattern_weekday$interval, 
+     pattern_weekday$mean_steps, 
+     type = "l",
+     col = "red",
+     xlab = "Interval",
+     ylab = "Average steps")
+
+lines(pattern_weekday$interval, 
+      pattern_weekend$mean_steps, 
+      col = "blue")
+
+legend("topright",
+       lty = 1,
+       col = c("red", "blue"), 
+       legend = c("Weekday", "Weekend"))
+
+```
+
