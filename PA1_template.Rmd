@@ -15,14 +15,26 @@ data <- read.csv("activity/activity.csv")
 
 ## What is mean total number of steps taken per day?
 
+The following histogram shows the distribution of daily total steps.
+
 ```{r}
 steps <- aggregate(data$steps, by = list(data$date), sum, na.rm = TRUE)
 
-mean(steps$x)
+hist(steps$x, 
+     main = "Daily total steps",
+     xlab = "")
+
+mean_steps <- mean(steps$x)
+median_steps <- median(steps$x)
 
 ```
+The mean is `r round(mean_steps, 2)` and the median is `r median_steps` steps.
+
+
 
 ## What is the average daily activity pattern?
+
+The following plot shows the average number of steps per 5-minute interval, averaged across all days.
 
 ```{r}
 pattern <- aggregate(data$steps, by = list(data$interval), mean, na.rm = TRUE)
@@ -36,22 +48,43 @@ plot(pattern$interval,
      xlab = "Interval",
      ylab = "Average steps")
 
+max_interval <- pattern[pattern$mean_steps == max(pattern$mean_steps), "interval"]
+
 ```
+On average the interval `r max_interval` contains the maximum number of steps.
+
 
 ## Imputing missing values
 
 ```{r}
 
+na_rows <- sum(!complete.cases(data))
+
+```
+The dataset contains `r na_rows` rows with missing values.
+
+The missing values will be replaced with the average number of daily steps for a given interval.
+
+```{r}
+
 data_imp <- tapply(data$steps, 
-                   as.factor(data$interval), 
+                   as.factor(data$date), 
                    \(x) replace(x, is.na(x), mean(x, na.rm = TRUE)),
                    simplify = TRUE)
 
-head(data_imp)
+steps_imp <- sapply(data_imp, sum)
+
+hist(steps_imp)
+
+mean_steps_imp <- mean(steps_imp, na.rm = TRUE)
+median_steps_imp <- median(steps_imp, na.rm = TRUE)
 
 ```
+The new mean is `r round(mean_steps_imp, 2)` and the new median is `r median_steps_imp` steps. Compared to the original data the are almost identical now, which means the the resulting distribution is more evenly spread.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+The following panel-plot shows the activity on weekdays and weekends. It seems that on weekdays the activity is higher in the morning, but lower during the day. This could reflect office working days compared to more active weekends. Though on weekends the activity starts later.
 
 ```{r}
 
@@ -67,21 +100,27 @@ names(pattern_weekend)[2] <- "mean_steps"
 names(pattern_weekday)[1] <- "interval"
 names(pattern_weekday)[2] <- "mean_steps"
 
+par(mfrow = c(2, 1), mar=c(3, 4, 0.5, 2))
+
 plot(pattern_weekday$interval, 
-     pattern_weekday$mean_steps, 
+     pattern_weekday$mean_steps,
+     ylim = c(0, 240),
      type = "l",
-     col = "red",
+     col = "red", 
      xlab = "Interval",
      ylab = "Average steps")
 
-lines(pattern_weekday$interval, 
-      pattern_weekend$mean_steps, 
-      col = "blue")
+legend("topright", legend = "weekday")
 
-legend("topright",
-       lty = 1,
-       col = c("red", "blue"), 
-       legend = c("Weekday", "Weekend"))
+plot(pattern_weekend$interval, 
+     pattern_weekend$mean_steps,
+     ylim = c(0, 240),
+     type = "l",
+     col = "blue",
+     xlab = "Interval",
+     ylab = "Average steps")
+
+legend("topright", legend = "weekend")
 
 ```
 
