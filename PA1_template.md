@@ -70,7 +70,7 @@ na_rows <- sum(!complete.cases(data))
 ```
 The dataset contains 2304 rows with missing values.
 
-The missing values will be replaced with the average number of daily steps for a given interval.
+The missing values will be replaced with the average number of steps of a given day.
 
 
 ```r
@@ -81,7 +81,7 @@ data_imp <- tapply(data$steps,
 
 steps_imp <- sapply(data_imp, sum)
 
-hist(steps_imp)
+hist(steps_imp, main = "Daily total steps (imputed data)", xlab = "")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
@@ -90,7 +90,7 @@ hist(steps_imp)
 mean_steps_imp <- mean(steps_imp, na.rm = TRUE)
 median_steps_imp <- median(steps_imp, na.rm = TRUE)
 ```
-The new mean is 1.076619\times 10^{4} and the new median is 1.0765\times 10^{4} steps. Compared to the original data the are almost identical now, which means the the resulting distribution is more evenly spread.
+The new mean is 1.076619\times 10^{4} and the new median is 1.0765\times 10^{4} steps. Compared to the original data both are almost identical now, which means the the resulting distribution is more evenly spread.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
